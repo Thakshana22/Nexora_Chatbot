@@ -180,7 +180,7 @@ This repo currently uses the explicit file path approach for simplicity; either 
 
 ---
 
-## 6)** **At a glance: what you now have
+## **6**)At a glance: what you now have
 
 - `nexora-chat-bot-be/.env` with your Flask, Google API key, and CORS settings.
 - `nexora-chat-bot-be/firebase_key.json` containing your Firebase service account credentials.
