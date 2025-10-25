@@ -188,3 +188,27 @@ This repo currently uses the explicit file path approach for simplicity; either 
 
 You’re ready to run the backend and connect the frontend.
 
+
+## How to launch
+
+```bash
+# Clone the repo
+git clone https://github.com/your-org/nexora-campus-copilot.git
+cd nexora-campus-copilot
+
+# Install backend dependencies
+cd backend
+pip install -r requirements.txt
+# Set environment variables
+export GOOGLE_APPLICATION_CREDENTIALS="firebase_key.json"
+
+# Run the backend
+python app.py
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+npm run dev
+```
+
+
