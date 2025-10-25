@@ -1,118 +1,190 @@
-# 🧩 Firebase Project Setup Guide
+# Environment (.env) and Firebase JSON Setup
 
-This guide will help you set up Firebase for your project — including downloading your service account JSON, enabling Email Authentication, and setting up Firestore.
+This guide shows exactly how to create the backend `.env` file and the Firebase service account `.json` file for this project.
 
-## 🚀 Step 1: Create a Firebase Project
+Repo layout reference:
 
-1. Go to the Firebase Console.
-2. Click "Add project" → enter a Project name (e.g., nexora-chat-bot).
-3. Disable Google Analytics if you don't need it → Click Create Project.
-4. Wait until your Firebase project is ready.
+- Backend: `nexora-chat-bot-be/` (Flask API)
+- Frontend: `nexora-chat-bot-fe/` (Vite/React)
 
-## 🔑 Step 2: Generate Service Account JSON
+The backend reads environment variables from `.env` via `python-dotenv` (see `nexora-chat-bot-be/config.py`) and expects a Firebase service key file at `nexora-chat-bot-be/firebase_key.json` (see `nexora-chat-bot-be/utils/firebase_config.py`).
 
-1. Navigate to Project Settings → Service Accounts.
-2. Click "Generate new private key".
-3. This will download a .json file (like the one shown in your screenshot).
-4. Rename the file (optional) to something like:
+---
 
-```
-firebase-service-account.json
-```
+## **1**) Create the .env file (backend)
 
-5. Place it inside your project folder, typically under:
+Create a file named `.env` inside the backend folder: `nexora-chat-bot-be/.env`.
+
+Recommended contents (replace placeholder values as needed):
 
 ```
-/config/firebase-service-account.json
+# Flask Configuration
+SECRET_KEY=change-me-to-a-long-random-string
+FLASK_ENV=development
+
+# Google API
+GOOGLE_API_KEY=your-google-api-key
+
+# File Upload
+UPLOAD_FOLDER=uploads
+
+# CORS Origins (comma-separated)
+CORS_ORIGINS=http://localhost:5173
 ```
 
-or
+Notes
+- `SECRET_KEY` is used by Flask; keep it secret.
+- `GOOGLE_API_KEY` is read by the PDF/Chat utilities.
+- `UPLOAD_FOLDER` defaults to `uploads` if not set.
+- `CORS_ORIGINS` controls which frontends can talk to the API; add more origins separated by commas when needed (e.g., your deployed site URL).
 
-```
-/server/firebase-service-account.json
-```
+Windows (PowerShell) quick create (optional):
 
-⚠ **Important**: Never push this file to GitHub or any public repository.
-Add it to your .gitignore file:
+```powershell
+# Run from the repo root
+New-Item -ItemType File -Path .\nexora-chat-bot-be\.env -Force | Out-Null
+Set-Content -Path .\nexora-chat-bot-be\.env @"
+# Flask Configuration
+SECRET_KEY=change-me-to-a-long-random-string
+FLASK_ENV=development
 
-```
-# Firebase service key
-firebase-service-account.json
-```
+# Google API
+GOOGLE_API_KEY=your-google-api-key
 
-## 🔥 Step 3: Initialize Firebase in Your Project
+# File Upload
+UPLOAD_FOLDER=uploads
 
-If using Node.js / Express / Nest.js, install the Firebase Admin SDK:
-
-```bash
-npm install firebase-admin
-```
-
-Then initialize Firebase in your code:
-
-```javascript
-const admin = require("firebase-admin");
-const serviceAccount = require("./config/firebase-service-account.json");
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-const db = admin.firestore();
-module.exports = { admin, db };
+# CORS Origins (comma-separated)
+CORS_ORIGINS=http://localhost:5173
+"@
 ```
 
-## 📧 Step 4: Enable Email/Password Authentication
+If `python-dotenv` is not installed, install it in your backend environment so the `.env` file is loaded automatically by `config.py`:
 
-1. In the Firebase Console, go to Authentication → Sign-in method tab.
-2. Enable Email/Password under the "Sign-in providers" list.
-3. Click Save.
-
-Now users can register and log in using email and password.
-
-## 🗃 Step 5: Set Up Firestore Database
-
-1. In the Firebase Console, navigate to Firestore Database.
-2. Click "Create database".
-3. Select Start in test mode (for development).
-4. Choose a location (preferably near your hosting region).
-5. Click Enable.
-
-Now you can use Firestore in your backend or frontend code:
-
-```javascript
-const usersRef = db.collection('users');
-
-// Add a new user
-await usersRef.add({
-  name: "John Doe",
-  email: "john@example.com",
-  createdAt: admin.firestore.FieldValue.serverTimestamp(),
-});
+```powershell
+pip install python-dotenv
 ```
 
-## 🧱 Optional: Environment Setup (Recommended)
+---
 
-Instead of hardcoding paths, store environment variables:
+## 2) Create the Firebase service account JSON
+
+Follow these steps to generate and place your Firebase Admin SDK key file.
+
+### Step 2.1: Generate the service account key from Firebase
+
+1. Open the [Firebase Console](https://console.firebase.google.com/) and select your project (e.g., `nexora-chat-bot`).
+2. Go to: **Project Settings** (gear icon) → **Service Accounts** tab.
+3. Click **"Generate new private key"** button.
+4. Confirm the download – this will download a JSON file with a long auto-generated name like:
+   - `nexora-chat-bot-firebase-adminsdk-xxxxx-1234567890.json`
+
+### Step 2.2: Rename and place the file
+
+5. **Rename** the downloaded file to: `firebase_key.json`
+6. **Move** it into your backend folder:
+   - `d:\3rd\back-end\Nexora_Chatbot\nexora-chat-bot-be\firebase_key.json`
+
+### Step 2.3: Verify the JSON structure
+
+Your `firebase_key.json` should look like this (with your actual values):
+
+```json
+{
+  "type": "service_account",
+  "project_id": "nexora-chat-bot",
+  "private_key_id": "a41b42cd78e61b0b6c3f52d1e3471f0b47c5b9ac",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@nexora-chat-bot.iam.gserviceaccount.com",
+  "client_id": "101045524155641668709",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xxxxx@nexora-chat-bot.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
+```
+
+**Important fields:**
+- `type`: Always "service_account"
+- `project_id`: Your Firebase project ID (must match your project)
+- `private_key`: The actual private key (keep this SECRET!)
+- `client_email`: The service account email
+
+### Why this exact name/path?
+
+The backend initializes Firebase Admin here: `utils/firebase_config.py`
+```python
+cred = credentials.Certificate('firebase_key.json')
+```
+If you prefer a different filename/path, update that line accordingly.
+
+### Security Warning
+
+⚠️ **CRITICAL**: Do NOT commit this file to Git or share it publicly!
+- The `private_key` field contains sensitive credentials
+- Anyone with this file has full admin access to your Firebase project
+- Add it to `.gitignore` immediately (see next section)
+
+---
+
+## **3**) .gitignore recommendations (security)
+
+Ensure secrets are never pushed to Git. In the backend folder, create a `.gitignore` (or update a root one) and include:
 
 ```
-GOOGLE_APPLICATION_CREDENTIALS=./config/firebase-service-account.json
+# Backend secrets
+nexora-chat-bot-be/.env
+nexora-chat-bot-be/firebase_key.json
 ```
 
-Then initialize Firebase like this:
+If you keep a backend-only `.gitignore`, the entries can be just:
 
-```javascript
-admin.initializeApp({
-  credential: admin.credential.applicationDefault(),
-});
+```
+.env
+firebase_key.json
 ```
 
-## ✅ Done!
+---
 
-You have now:
-- Created a Firebase project
-- Added a service account JSON file
-- Enabled Email Authentication
-- Set up Firestore
+## **4**) Verifying your setup
 
-You're ready to integrate Firebase services in your app 🎉
+- `.env` is loaded by `nexora-chat-bot-be/config.py` via `load_dotenv()`. You should see your settings reflected at runtime (e.g., CORS origin and upload folder behavior).
+- `firebase_key.json` is read by `nexora-chat-bot-be/utils/firebase_config.py`. If the file is missing or invalid, the server will fail to initialize Firebase Admin.
+
+Common checks
+- CORS errors from the frontend: add your frontend URL to `CORS_ORIGINS` in `.env` (comma-separated) and restart the backend.
+- “File not found: firebase_key.json”: confirm the file exists at `nexora-chat-bot-be/firebase_key.json` and the process has permission to read it.
+
+---
+
+## **5**) Optional alternative: environment variable path
+
+If you prefer not to hardcode the filename in code, you can set an environment variable and change initialization code to use `applicationDefault()`:
+
+```
+GOOGLE_APPLICATION_CREDENTIALS=./nexora-chat-bot-be/firebase_key.json
+```
+
+Then update Firebase Admin init (optional pattern):
+
+```python
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.ApplicationDefault()
+firebase_admin.initialize_app(cred)
+```
+
+This repo currently uses the explicit file path approach for simplicity; either pattern works.
+
+---
+
+## 6)** **At a glance: what you now have
+
+- `nexora-chat-bot-be/.env` with your Flask, Google API key, and CORS settings.
+- `nexora-chat-bot-be/firebase_key.json` containing your Firebase service account credentials.
+- Git ignored secrets to keep your keys safe.
+
+You’re ready to run the backend and connect the frontend.
+
